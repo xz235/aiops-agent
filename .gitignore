@@ -1,0 +1,10 @@
+target/
+.m2/
+.idea/
+*.iml
+*.log
+.env
+data/
+reports/*.pdf
+!reports/.gitkeep
+

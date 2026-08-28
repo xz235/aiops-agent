@@ -38,24 +38,25 @@ Build a runnable AIOps Agent platform focused on the three resume claims:
 
 ## Planned checkpoints
 
-- [ ] C1: Maven project, application startup, health endpoint, configuration profiles.
+- [x] C1: Maven project, application startup, health endpoint, configuration profiles.
 - [ ] C2: Diagnosis task domain model, Redis repositories, event journal.
-- [ ] C3: Markdown Skill parser, validation, registry, reload, three diagnostic handlers.
-- [ ] C4: Agent runtime, planner abstraction, mock planner, tool execution loop.
-- [ ] C5: SSE stream with event IDs, heartbeat, replay, and reconnect support.
-- [ ] C6: Runbook retrieval and evidence-bound diagnosis.
-- [ ] C7: PDF generation and secure report download endpoint.
+- [x] C3: Markdown Skill parser, validation, registry, reload, three diagnostic handlers.
+- [x] C4: Agent runtime, planner abstraction, mock planner, tool execution loop.
+- [ ] C5: SSE stream with event IDs, replay, and reconnect support implemented; heartbeat pending.
+- [x] C6: Runbook retrieval and evidence-bound diagnosis.
+- [x] C7: PDF generation and secure report download endpoint.
 - [ ] C8: Demo UI and three simulated fault scenarios.
 - [ ] C9: Docker Compose, tests, metrics, audit logs, README, interview guide.
 
 ## Current state
 
 - Reference project inspected read-only.
-- New project directory created.
-- Implementation scope frozen around the resume claims and runnable diagnosis chain.
-- Next action: create C1 Maven structure and core configuration.
+- New Spring Boot project compiles successfully with Java 17.
+- End-to-end offline diagnosis chain is implemented in code using in-memory repositories.
+- Three Markdown Skills dynamically bind to Spring `SkillHandler` beans.
+- Next action: implement the Redis profile repositories, SSE heartbeat, tests, and run the HTTP workflow.
 
 ## Verification log
 
-No compilation or runtime verification has been performed yet.
-
+- `mvn -s .mvn/settings.xml -q -DskipTests compile` passed on 2026-08-28.
+- Application startup and HTTP end-to-end verification are still pending.

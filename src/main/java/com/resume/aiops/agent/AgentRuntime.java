@@ -5,6 +5,8 @@ import com.resume.aiops.agent.domain.DiagnosisTask;
 import com.resume.aiops.agent.domain.TaskStatus;
 import com.resume.aiops.memory.TaskStateRepository;
 import com.resume.aiops.memory.ToolCallRepository;
+import com.resume.aiops.memory.AgentMemoryRepository;
+import com.resume.aiops.memory.domain.AgentMemoryEntry;
 import com.resume.aiops.memory.domain.AgentEventType;
 import com.resume.aiops.memory.domain.ToolCallRecord;
 import com.resume.aiops.rag.RunbookEvidence;
@@ -29,6 +31,7 @@ import org.springframework.stereotype.Service;
 public class AgentRuntime {
     private final TaskStateRepository taskRepository;
     private final ToolCallRepository toolCallRepository;
+    private final AgentMemoryRepository memoryRepository;
     private final AgentPlanner planner;
     private final SkillExecutor skillExecutor;
     private final RunbookRetriever runbookRetriever;
@@ -40,11 +43,13 @@ public class AgentRuntime {
     private final Counter failedCounter;
 
     public AgentRuntime(TaskStateRepository taskRepository, ToolCallRepository toolCallRepository,
+                        AgentMemoryRepository memoryRepository,
                         AgentPlanner planner, SkillExecutor skillExecutor, RunbookRetriever runbookRetriever,
                         DiagnosisSynthesizer synthesizer, PdfReportService reportService,
                         AgentEventPublisher eventPublisher, Clock clock, MeterRegistry meterRegistry) {
         this.taskRepository = taskRepository;
         this.toolCallRepository = toolCallRepository;
+        this.memoryRepository = memoryRepository;
         this.planner = planner;
         this.skillExecutor = skillExecutor;
         this.runbookRetriever = runbookRetriever;
@@ -70,6 +75,9 @@ public class AgentRuntime {
 
             DiagnosisTask retrieving = transition(task, TaskStatus.RETRIEVING);
             List<RunbookEvidence> evidence = runbookRetriever.retrieve(retrieving.alert(), 3);
+            memoryRepository.append(new AgentMemoryEntry(UUID.randomUUID().toString(), taskId,
+                    "RAG_EVIDENCE", "Retrieved " + evidence.size() + " relevant runbook(s)",
+                    Map.of("documents", evidence), Instant.now(clock)));
             eventPublisher.publish(taskId, AgentEventType.RAG_RETRIEVAL,
                     Map.of("references", evidence));
 
@@ -81,6 +89,8 @@ public class AgentRuntime {
 
             DiagnosisTask analyzing = transition(executing, TaskStatus.ANALYZING);
             String conclusion = synthesizer.synthesize(analyzing.alert(), calls, evidence);
+            memoryRepository.append(new AgentMemoryEntry(UUID.randomUUID().toString(), taskId,
+                    "DIAGNOSIS", conclusion, Map.of("toolCallCount", calls.size()), Instant.now(clock)));
             streamConclusion(taskId, conclusion);
 
             DiagnosisTask reporting = transition(analyzing, TaskStatus.GENERATING_REPORT);
@@ -154,4 +164,3 @@ public class AgentRuntime {
         failedCounter.increment();
     }
 }
-

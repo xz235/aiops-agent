@@ -39,7 +39,7 @@ Build a runnable AIOps Agent platform focused on the three resume claims:
 ## Planned checkpoints
 
 - [x] C1: Maven project, application startup, health endpoint, configuration profiles.
-- [ ] C2: Diagnosis task domain model, Redis repositories, event journal.
+- [x] C2: Diagnosis task domain model, Redis repositories, Agent Memory, tool history, and event journal.
 - [x] C3: Markdown Skill parser, validation, registry, reload, three diagnostic handlers.
 - [x] C4: Agent runtime, planner abstraction, mock planner, tool execution loop.
 - [ ] C5: SSE stream with event IDs, replay, and reconnect support implemented; heartbeat pending.
@@ -54,9 +54,12 @@ Build a runnable AIOps Agent platform focused on the three resume claims:
 - New Spring Boot project compiles successfully with Java 17.
 - End-to-end offline diagnosis chain is implemented in code using in-memory repositories.
 - Three Markdown Skills dynamically bind to Spring `SkillHandler` beans.
-- Next action: implement the Redis profile repositories, SSE heartbeat, tests, and run the HTTP workflow.
+- Redis profile repositories and Agent Memory have been implemented and compile successfully.
+- Work intentionally paused before runtime dependency download and HTTP verification because the user is going offline.
+- Next action: run `mvn -s .mvn/settings.xml test` with network access, start the local profile, and verify the HTTP/SSE/PDF workflow.
 
 ## Verification log
 
 - `mvn -s .mvn/settings.xml -q -DskipTests compile` passed on 2026-08-28.
+- Compilation also passed after adding Redis State, Memory, event, and tool-call repositories.
 - Application startup and HTTP end-to-end verification are still pending.

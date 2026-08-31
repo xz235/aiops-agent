@@ -1,5 +1,6 @@
 package com.resume.aiops.skill;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.resume.aiops.config.AiOpsProperties;
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
@@ -12,20 +13,24 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.context.ApplicationContext;
+import org.springframework.ai.tool.ToolCallback;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DynamicSkillRegistry {
+public class DynamicSkillRegistry implements ToolCallbackProvider {
     private final AiOpsProperties properties;
     private final MarkdownSkillParser parser;
     private final ApplicationContext applicationContext;
+    private final ObjectMapper objectMapper;
     private final AtomicReference<Map<String, RegisteredSkill>> registry = new AtomicReference<>(Map.of());
 
     public DynamicSkillRegistry(AiOpsProperties properties, MarkdownSkillParser parser,
-                                ApplicationContext applicationContext) {
+                                ApplicationContext applicationContext, ObjectMapper objectMapper) {
         this.properties = properties;
         this.parser = parser;
         this.applicationContext = applicationContext;
+        this.objectMapper = objectMapper;
     }
 
     @PostConstruct
@@ -59,6 +64,13 @@ public class DynamicSkillRegistry {
         return registeredSkill;
     }
 
+    @Override
+    public ToolCallback[] getToolCallbacks() {
+        return registry.get().values().stream()
+                .map(skill -> new SpringAiSkillToolCallback(skill, objectMapper))
+                .toArray(ToolCallback[]::new);
+    }
+
     private void register(Map<String, RegisteredSkill> next, SkillDefinition definition) {
         if (next.containsKey(definition.name())) {
             throw new IllegalArgumentException("Duplicate skill name: " + definition.name());
@@ -75,4 +87,3 @@ public class DynamicSkillRegistry {
     public record RegisteredSkill(SkillDefinition definition, SkillHandler handler) {
     }
 }
-

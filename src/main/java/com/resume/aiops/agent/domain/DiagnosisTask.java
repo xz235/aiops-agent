@@ -29,7 +29,7 @@ public record DiagnosisTask(
     }
 
     public DiagnosisTask withPlan(List<String> skills, Instant now) {
-        return new DiagnosisTask(taskId, version + 1, TaskStatus.EXECUTING_TOOLS, alert, skills,
+        return new DiagnosisTask(taskId, version + 1, TaskStatus.PLANNING, alert, skills,
                 conclusion, reportId, errorMessage, createdAt, now);
     }
 
@@ -43,4 +43,3 @@ public record DiagnosisTask(
                 conclusion, reportId, message, createdAt, now);
     }
 }
-

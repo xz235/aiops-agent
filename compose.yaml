@@ -1,0 +1,41 @@
+services:
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  aiops:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: redis
+      REDIS_HOST: redis
+      AIOPS_SKILLS_DIR: /app/skills
+      AIOPS_RUNBOOKS_DIR: /app/runbooks
+      AIOPS_REPORTS_DIR: /app/reports
+    volumes:
+      - ./skills:/app/skills:ro
+      - ./runbooks:/app/runbooks:ro
+      - reports-data:/app/reports
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  redis-data:
+  reports-data:
+

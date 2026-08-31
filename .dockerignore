@@ -1,0 +1,6 @@
+.git
+.idea
+.m2
+target
+reports/*.pdf
+

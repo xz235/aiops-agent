@@ -27,7 +27,7 @@ Build a runnable AIOps Agent platform focused on the three resume claims:
 
 - New implementation; the old SuperBizAgent project is read-only reference material.
 - Modular monolith, not microservices.
-- Java 21, Maven, Spring Boot, Spring AI.
+- Java 17, Maven, Spring Boot, Spring AI.
 - Redis is required for runtime state and memory.
 - H2 is allowed for the default local demo; PostgreSQL is enabled by Docker profile.
 - A deterministic mock model is available so the complete demo works without an API key.
@@ -42,11 +42,11 @@ Build a runnable AIOps Agent platform focused on the three resume claims:
 - [x] C2: Diagnosis task domain model, Redis repositories, Agent Memory, tool history, and event journal.
 - [x] C3: Markdown Skill parser, validation, registry, reload, three diagnostic handlers.
 - [x] C4: Agent runtime, planner abstraction, mock planner, tool execution loop.
-- [ ] C5: SSE stream with event IDs, replay, and reconnect support implemented; heartbeat pending.
+- [x] C5: SSE stream with event IDs, replay, reconnect support, heartbeat, and terminal cleanup.
 - [x] C6: Runbook retrieval and evidence-bound diagnosis.
 - [x] C7: PDF generation and secure report download endpoint.
-- [ ] C8: Demo UI and three simulated fault scenarios.
-- [ ] C9: Docker Compose, tests, metrics, audit logs, README, interview guide.
+- [x] C8: Demo UI and three simulated fault scenarios.
+- [ ] C9: Docker Compose, tests, metrics, and README complete; audit log and interview guide pending.
 
 ## Current state
 
@@ -55,11 +55,17 @@ Build a runnable AIOps Agent platform focused on the three resume claims:
 - End-to-end offline diagnosis chain is implemented in code using in-memory repositories.
 - Three Markdown Skills dynamically bind to Spring `SkillHandler` beans.
 - Redis profile repositories and Agent Memory have been implemented and compile successfully.
-- Work intentionally paused before runtime dependency download and HTTP verification because the user is going offline.
-- Next action: run `mvn -s .mvn/settings.xml test` with network access, start the local profile, and verify the HTTP/SSE/PDF workflow.
+- Local HTTP workflow verified through task completion, 36 replayable SSE events, two dynamic Tool calls, and PDF download.
+- Spring AI native `ToolCallbackProvider` adapter and optional real LLM Profile implemented.
+- Demo console, Dockerfile, Redis Compose stack, tests, metrics, and README implemented.
+- Next action: run the Redis Compose profile and verify application restart persistence; then add audit query API and interview guide.
 
 ## Verification log
 
 - `mvn -s .mvn/settings.xml -q -DskipTests compile` passed on 2026-08-28.
 - Compilation also passed after adding Redis State, Memory, event, and tool-call repositories.
-- Application startup and HTTP end-to-end verification are still pending.
+- Local application startup passed on 2026-08-31.
+- `cpu_spike` HTTP diagnosis completed and generated a valid 1,279-byte PDF.
+- SSE replay returned ordered events 1 through 36, including Tool progress, model tokens, `REPORT_READY`, and completion.
+- `mvn -s .mvn/settings.xml -q test` passed: 2 tests, 0 failures, 0 errors.
+- `docker compose config --quiet` passed.

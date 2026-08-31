@@ -29,6 +29,7 @@ aiops:
   task-timeout: 5m
   sse-timeout: 30m
   max-agent-steps: 8
+  sse-heartbeat-ms: 15000
 
 logging:
   pattern:
@@ -45,3 +46,13 @@ spring:
       port: ${REDIS_PORT:6379}
       timeout: 2s
 
+---
+spring:
+  config:
+    activate:
+      on-profile: llm
+aiops:
+  llm:
+    api-key: ${OPENAI_API_KEY}
+    base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+    model: ${OPENAI_MODEL:gpt-4.1-mini}

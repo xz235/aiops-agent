@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AIOps Agent Console</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <p class="eyebrow">EVIDENCE-DRIVEN OPERATIONS</p>
+      <h1>AIOps Agent Console</h1>
+      <p>从告警到证据、诊断与报告的可观测闭环</p>
+    </div>
+    <span id="health" class="badge">READY</span>
+  </header>
+
+  <section class="panel controls">
+    <div>
+      <label for="scenario">故障场景</label>
+      <select id="scenario">
+        <option value="cpu_spike">CPU 飙升 / GC 压力</option>
+        <option value="connection_pool">数据库连接池耗尽</option>
+        <option value="bad_release">错误版本发布</option>
+      </select>
+    </div>
+    <button id="start">启动智能诊断</button>
+  </section>
+
+  <section class="grid">
+    <article class="panel">
+      <div class="panel-title"><h2>任务状态</h2><span id="status">IDLE</span></div>
+      <dl id="task-meta"><dt>Task ID</dt><dd>尚未创建</dd></dl>
+      <a id="report" class="report hidden">下载 PDF 报告</a>
+    </article>
+    <article class="panel">
+      <div class="panel-title"><h2>诊断结论</h2></div>
+      <p id="conclusion" class="conclusion">等待诊断任务...</p>
+    </article>
+  </section>
+
+  <section class="panel">
+    <div class="panel-title"><h2>Agent 执行时间线</h2><span id="event-count">0 EVENTS</span></div>
+    <ol id="timeline" class="timeline"></ol>
+  </section>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>
+

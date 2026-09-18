@@ -1,0 +1,65 @@
+{
+  "taskId": "864bf663-4ad0-44c9-a4ad-aab87978c175",
+  "scenario": "bad_release",
+  "service": "order-service",
+  "status": "COMPLETED",
+  "plannedSkills": [
+    "query_service_metrics",
+    "query_application_logs",
+    "query_recent_releases"
+  ],
+  "rag": [
+    {
+      "documentId": "bad-release.md",
+      "title": "Bad release rollback runbook",
+      "score": 0.4
+    },
+    {
+      "documentId": "cpu-spike.md",
+      "title": "CPU spike and GC pressure runbook",
+      "score": 0.1
+    }
+  ],
+  "toolCalls": [
+    {
+      "skillName": "query_service_metrics",
+      "arguments": {"timeRange": "15m"},
+      "result": {
+        "service": "order-service",
+        "errorRate": 0.183,
+        "requestP95Ms": 2870,
+        "window": "15m"
+      },
+      "success": true,
+      "latencyMs": 2
+    },
+    {
+      "skillName": "query_application_logs",
+      "arguments": {"query": "level:ERROR"},
+      "result": {
+        "service": "order-service",
+        "matched": 2,
+        "samples": [
+          "NoSuchMethodError after deployment version 2.4.1",
+          "HTTP 500 /orders/submit traceId=demo-101"
+        ]
+      },
+      "success": true,
+      "latencyMs": 0
+    },
+    {
+      "skillName": "query_recent_releases",
+      "arguments": {"timeRange": "2h"},
+      "result": {
+        "service": "order-service",
+        "version": "2.4.1",
+        "recentChange": true
+      },
+      "success": true,
+      "latencyMs": 0
+    }
+  ],
+  "conclusion": "The error spike correlates with release 2.4.1 and is consistent with a binary compatibility failure. Diagnosis is backed by 3 tool results and 2 runbook reference(s).",
+  "report": "docs/sample-diagnosis-report.pdf",
+  "eventCount": 42
+}

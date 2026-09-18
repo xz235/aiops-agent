@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Run tests
+        run: mvn -B -s .mvn/settings.xml test
+
+      - name: Package application
+        run: mvn -B -s .mvn/settings.xml package -DskipTests
+
+      - name: Validate Docker Compose
+        run: docker compose config --quiet

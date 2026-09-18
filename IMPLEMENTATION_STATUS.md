@@ -73,3 +73,4 @@ Build a runnable AIOps Agent platform focused on the three resume claims:
 - `docker compose config --quiet` passed.
 - Redis Profile restart recovery passed on 2026-09-18: task `15348c87-a5bf-48a1-acfc-13743e8854bf` remained `COMPLETED` at version 8 with 2 memory records, 3 tool calls, and 42 replayable events.
 - The recovered task's PDF report remained downloadable after restart (HTTP 200, `application/pdf`, 1,329 bytes).
+- GitHub showcase completed on 2026-09-18: README architecture diagram, dashboard screenshot, full Agent chain, Skills, SOPs, real RAG/Tool audit sample, polished PDF report, quick start, test evidence, MIT license, environment template, and CI workflow.

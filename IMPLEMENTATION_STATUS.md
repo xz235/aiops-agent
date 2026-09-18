@@ -59,7 +59,7 @@ Build a runnable AIOps Agent platform focused on the three resume claims:
 - Spring AI native `ToolCallbackProvider` adapter and optional real LLM Profile implemented.
 - Demo console, Dockerfile, Redis Compose stack, tests, metrics, and README implemented.
 - Audit query API and a resume-oriented Chinese interview guide are implemented.
-- Remaining verification: run the Redis Compose profile and confirm task/event recovery after an application restart.
+- Redis Compose restart recovery has been verified end to end; the retained volume can be reused for later demos.
 
 ## Verification log
 
@@ -71,3 +71,5 @@ Build a runnable AIOps Agent platform focused on the three resume claims:
 - `mvn -s .mvn/settings.xml -q test` passed: 2 tests, 0 failures, 0 errors.
 - The test suite passed again on 2026-09-18 after adding the audit view assertions.
 - `docker compose config --quiet` passed.
+- Redis Profile restart recovery passed on 2026-09-18: task `15348c87-a5bf-48a1-acfc-13743e8854bf` remained `COMPLETED` at version 8 with 2 memory records, 3 tool calls, and 42 replayable events.
+- The recovered task's PDF report remained downloadable after restart (HTTP 200, `application/pdf`, 1,329 bytes).

@@ -29,7 +29,7 @@ Build a runnable AIOps Agent platform focused on the three resume claims:
 - Modular monolith, not microservices.
 - Java 17, Maven, Spring Boot, Spring AI.
 - Redis is required for runtime state and memory.
-- H2 is allowed for the default local demo; PostgreSQL is enabled by Docker profile.
+- The local demo uses in-memory repositories; the Docker profile uses Redis persistence.
 - A deterministic mock model is available so the complete demo works without an API key.
 - Real model access uses an OpenAI-compatible configuration profile.
 - RAG has a local deterministic implementation for offline use; a vector-store adapter can be added without changing the Agent API.
@@ -46,7 +46,7 @@ Build a runnable AIOps Agent platform focused on the three resume claims:
 - [x] C6: Runbook retrieval and evidence-bound diagnosis.
 - [x] C7: PDF generation and secure report download endpoint.
 - [x] C8: Demo UI and three simulated fault scenarios.
-- [ ] C9: Docker Compose, tests, metrics, and README complete; audit log and interview guide pending.
+- [x] C9: Docker Compose, tests, metrics, README, audit query API, and interview guide complete.
 
 ## Current state
 
@@ -58,7 +58,8 @@ Build a runnable AIOps Agent platform focused on the three resume claims:
 - Local HTTP workflow verified through task completion, 36 replayable SSE events, two dynamic Tool calls, and PDF download.
 - Spring AI native `ToolCallbackProvider` adapter and optional real LLM Profile implemented.
 - Demo console, Dockerfile, Redis Compose stack, tests, metrics, and README implemented.
-- Next action: run the Redis Compose profile and verify application restart persistence; then add audit query API and interview guide.
+- Audit query API and a resume-oriented Chinese interview guide are implemented.
+- Remaining verification: run the Redis Compose profile and confirm task/event recovery after an application restart.
 
 ## Verification log
 
@@ -68,4 +69,5 @@ Build a runnable AIOps Agent platform focused on the three resume claims:
 - `cpu_spike` HTTP diagnosis completed and generated a valid 1,279-byte PDF.
 - SSE replay returned ordered events 1 through 36, including Tool progress, model tokens, `REPORT_READY`, and completion.
 - `mvn -s .mvn/settings.xml -q test` passed: 2 tests, 0 failures, 0 errors.
+- The test suite passed again on 2026-09-18 after adding the audit view assertions.
 - `docker compose config --quiet` passed.

@@ -34,6 +34,8 @@ Redis Profile 分别保存：
 
 任务快照使用 Lua 脚本原子校验版本，拒绝旧状态回写。
 
+完整审计视图可通过 `GET /api/diagnoses/{taskId}/audit` 查询。
+
 ### SSE 统一事件流
 
 `GET /api/diagnoses/{taskId}/events` 返回带事件 ID 的 SSE。支持
@@ -98,4 +100,3 @@ mvn -s .mvn/settings.xml test
 ```
 
 测试覆盖 Markdown Skill 解析与完整诊断、Tool 调用及 PDF 生成流程。
-

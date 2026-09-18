@@ -7,6 +7,8 @@ import com.resume.aiops.agent.domain.DiagnosisTask;
 import com.resume.aiops.agent.domain.TaskStatus;
 import java.time.Duration;
 import java.util.Map;
+import com.resume.aiops.observability.TaskAuditService;
+import com.resume.aiops.observability.TaskAuditView;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 class DiagnosisWorkflowIntegrationTest {
     @Autowired
     DiagnosisTaskService taskService;
+    @Autowired
+    TaskAuditService auditService;
 
     @Test
     void completesBadReleaseDiagnosisAndGeneratesReport() {
@@ -32,7 +36,11 @@ class DiagnosisWorkflowIntegrationTest {
             assertThat(completed.reportId()).isNotBlank();
             assertThat(completed.conclusion()).contains("release 2.4.1");
             assertThat(completed.plannedSkills()).contains("query_recent_releases");
+            TaskAuditView audit = auditService.get(created.taskId());
+            assertThat(audit.memory()).extracting("category")
+                    .contains("RAG_EVIDENCE", "DIAGNOSIS");
+            assertThat(audit.toolCalls()).hasSize(3).allMatch(call -> call.success());
+            assertThat(audit.events()).isNotEmpty();
         });
     }
 }
-

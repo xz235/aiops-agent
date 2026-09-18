@@ -3,6 +3,8 @@
 一个面向简历演示与工程学习的智能运维 Agent 平台。它把告警、知识检索、动态
 Skill 调用、诊断状态、流式进度与 PDF 报告连接为一条可运行链路。
 
+![AIOps 可视化指挥中心](docs/dashboard-preview.png)
+
 ## 核心链路
 
 ```text

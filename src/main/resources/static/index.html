@@ -3,101 +3,123 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SentinelOps · AI Diagnosis Center</title>
+  <title>OrbitOps · Autonomous Operations</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-<div class="shell">
-  <aside class="sidebar">
-    <a class="brand" href="#" aria-label="SentinelOps home">
-      <span class="brand-mark"><i></i><i></i><i></i></span>
-      <span><strong>Sentinel</strong><em>OPS</em></span>
-    </a>
-    <nav>
-      <p>WORKSPACE</p>
-      <a class="active" href="#"><span>⌁</span>智能诊断</a>
-      <a href="#"><span>◇</span>告警中心<small>12</small></a>
-      <a href="#"><span>⌘</span>Agent 任务</a>
-      <p>KNOWLEDGE</p>
-      <a href="#"><span>▱</span>运行手册</a>
-      <a href="#"><span>⬡</span>Skills 管理<small>3</small></a>
-      <a href="#"><span>⌗</span>审计记录</a>
+<div class="app-shell">
+  <aside class="rail">
+    <div class="logo"><span></span><b>O</b></div>
+    <nav aria-label="主导航">
+      <button class="nav-button active" aria-label="智能诊断">⌁</button>
+      <button class="nav-button" aria-label="告警">◇<i>3</i></button>
+      <button class="nav-button" aria-label="知识库">▱</button>
+      <button class="nav-button" aria-label="Skills">⌘</button>
+      <button class="nav-button" aria-label="审计">⌗</button>
     </nav>
-    <div class="sidebar-foot">
-      <div class="system-dot"></div>
-      <div><strong>系统运行正常</strong><span>All systems operational</span></div>
-    </div>
+    <div class="rail-status"><span></span></div>
+    <div class="avatar">SA</div>
   </aside>
 
   <main>
     <header class="topbar">
-      <div><p class="breadcrumb">工作台 / 智能诊断</p><h1>AI 智能诊断中心</h1></div>
-      <div class="top-actions">
-        <span class="environment"><i></i> PROD · CN-NORTH-1</span>
-        <button class="icon-button" aria-label="通知">◴<b>3</b></button>
-        <div class="avatar">SA</div>
-      </div>
+      <div><span class="product">ORBITOPS</span><i>/</i><strong>Autonomous Operations</strong></div>
+      <div class="top-status"><span><i></i>PRODUCTION</span><span>CN-NORTH-1</span><time id="clock">--:--:--</time></div>
     </header>
 
-    <section class="hero">
-      <div class="hero-copy">
-        <span class="ai-label"><i></i> AIOPS DIAGNOSIS AGENT</span>
-        <h2>从告警到根因，<br><em>让每一次排障都有据可循。</em></h2>
-        <p>融合运行手册检索、动态 Skill 调用与证据推理，实时生成可审计的诊断结论。</p>
-      </div>
-      <div class="hero-orbit" aria-hidden="true">
-        <div class="orbit orbit-one"><span></span></div>
-        <div class="orbit orbit-two"><span></span></div>
-        <div class="core"><i></i></div>
-      </div>
+    <section class="heading">
+      <div><p>AI INCIDENT COMMAND CENTER</p><h1>智能运维指挥中心</h1></div>
+      <div class="live-chip"><i></i><span>LIVE</span>所有系统在线</div>
     </section>
 
-    <section class="metrics">
-      <article><span class="metric-icon purple">⌘</span><div><small>今日诊断任务</small><strong>24</strong><em>↑ 18.2%</em></div></article>
-      <article><span class="metric-icon green">✓</span><div><small>诊断成功率</small><strong>96.8%</strong><em>↑ 2.4%</em></div></article>
-      <article><span class="metric-icon blue">◷</span><div><small>平均诊断耗时</small><strong id="elapsed">42s</strong><em>↓ 31.5%</em></div></article>
-      <article><span class="metric-icon amber">⚡</span><div><small>已加载 Skills</small><strong>3</strong><em class="neutral">全部可用</em></div></article>
+    <section class="kpi-strip">
+      <article><span>活跃告警</span><strong>12</strong><div class="spark"><i style="height:28%"></i><i style="height:45%"></i><i style="height:35%"></i><i style="height:76%"></i><i style="height:55%"></i><i style="height:90%"></i><i style="height:62%"></i></div></article>
+      <article><span>今日自动诊断</span><strong>24</strong><em>+18.2%</em></article>
+      <article><span>诊断成功率</span><strong>96.8<small>%</small></strong><div class="mini-ring" style="--percent:96.8"></div></article>
+      <article><span>平均恢复时间</span><strong id="elapsed">42<small>s</small></strong><em class="down">−31.5%</em></article>
     </section>
 
-    <section class="workspace-grid">
-      <article class="card launch-card">
-        <div class="card-heading"><div><span class="kicker">NEW DIAGNOSIS</span><h3>发起智能诊断</h3></div><span id="health" class="live"><i></i>AGENT READY</span></div>
-        <label for="scenario">选择故障场景</label>
-        <div class="select-wrap">
-          <select id="scenario">
-            <option value="cpu_spike">CPU 飙升 / GC 压力</option>
-            <option value="connection_pool">数据库连接池耗尽</option>
-            <option value="bad_release">版本发布异常</option>
-          </select>
+    <section class="cockpit">
+      <article class="topology-panel">
+        <div class="panel-head">
+          <div><span>LIVE AGENT GRAPH</span><h2>实时诊断拓扑</h2></div>
+          <div class="legend"><i class="ready"></i>待命 <i class="running"></i>执行中 <i class="done"></i>已完成</div>
         </div>
-        <div id="scenario-detail" class="scenario-detail"></div>
-        <button id="start" class="primary-button"><span>✦</span>启动 Agent 诊断<i>→</i></button>
-        <p class="security-note">▣ 诊断工具均为只读操作，全程记录审计日志</p>
-      </article>
 
-      <article class="card task-card">
-        <div class="card-heading"><div><span class="kicker">ACTIVE TASK</span><h3>任务概览</h3></div><span id="status" class="status-pill idle">IDLE</span></div>
-        <dl id="task-meta">
-          <div><dt>任务编号</dt><dd>等待创建</dd></div><div><dt>目标服务</dt><dd>—</dd></div><div><dt>告警等级</dt><dd>—</dd></div>
-        </dl>
-        <div class="pipeline">
-          <div data-step="created"><i>1</i><span>接收告警</span></div><div data-step="planning"><i>2</i><span>任务规划</span></div><div data-step="tools"><i>3</i><span>工具执行</span></div><div data-step="report"><i>4</i><span>生成报告</span></div>
+        <div class="topology" id="topology">
+          <svg class="link-map" viewBox="0 0 800 470" preserveAspectRatio="none" aria-label="Agent 诊断链路">
+            <defs><linearGradient id="flow" x1="0" x2="1"><stop stop-color="#29d6b0"/><stop offset=".48" stop-color="#9274ff"/><stop offset="1" stop-color="#4ca8ff"/></linearGradient></defs>
+            <path class="link" d="M105 235 C180 235 205 145 285 145"/>
+            <path class="link" d="M105 235 C180 235 205 325 285 325"/>
+            <path class="link primary-link" d="M285 145 C345 145 335 235 400 235"/>
+            <path class="link primary-link" d="M285 325 C345 325 335 235 400 235"/>
+            <path class="link primary-link" d="M400 235 C465 235 455 105 525 105"/>
+            <path class="link primary-link" d="M400 235 C465 235 455 235 525 235"/>
+            <path class="link primary-link" d="M400 235 C465 235 455 365 525 365"/>
+            <path class="link" d="M525 105 C620 105 605 195 690 195"/>
+            <path class="link" d="M525 235 C610 235 610 235 690 235"/>
+            <path class="link" d="M525 365 C620 365 605 275 690 275"/>
+            <circle class="packet packet-one" r="4"><animateMotion dur="2.4s" repeatCount="indefinite" path="M105 235 C180 235 205 145 285 145 C345 145 335 235 400 235 C465 235 455 105 525 105 C620 105 605 195 690 195"/></circle>
+            <circle class="packet packet-two" r="3"><animateMotion dur="3s" begin="-.8s" repeatCount="indefinite" path="M105 235 C180 235 205 325 285 325 C345 325 335 235 400 235 C465 235 455 365 525 365 C620 365 605 275 690 275"/></circle>
+          </svg>
+
+          <div class="graph-node alert-node" data-graph="alert"><div class="hex">!</div><strong>告警事件</strong><small id="graph-service">等待接入</small></div>
+          <div class="graph-node context-node" data-graph="rag"><div class="node-icon">▱</div><strong>RAG 检索</strong><small>运行手册</small></div>
+          <div class="graph-node memory-node" data-graph="memory"><div class="node-icon">◎</div><strong>Memory</strong><small>上下文记忆</small></div>
+          <div class="agent-core" data-graph="agent"><div class="rings"><i></i><i></i><span>✦</span></div><strong>DIAGNOSIS<br>AGENT</strong><small id="agent-state">STANDBY</small></div>
+          <div class="graph-node skill-node skill-one" data-graph="metrics"><div class="node-icon">⌁</div><strong>Metrics</strong><small>指标查询</small></div>
+          <div class="graph-node skill-node skill-two" data-graph="logs"><div class="node-icon">≋</div><strong>Logs</strong><small>日志分析</small></div>
+          <div class="graph-node skill-node skill-three" data-graph="releases"><div class="node-icon">↟</div><strong>Releases</strong><small>发布记录</small></div>
+          <div class="graph-node output-node" data-graph="report"><div class="hex">✓</div><strong>诊断报告</strong><small>证据闭环</small></div>
         </div>
-        <a id="report" class="report-button hidden">↓ 下载诊断报告 <span>PDF</span></a>
+
+        <div class="stage-track" aria-label="诊断进度">
+          <div data-stage="created"><i>01</i><span>告警接入</span></div><b></b>
+          <div data-stage="planning"><i>02</i><span>意图规划</span></div><b></b>
+          <div data-stage="rag"><i>03</i><span>知识检索</span></div><b></b>
+          <div data-stage="tools"><i>04</i><span>工具取证</span></div><b></b>
+          <div data-stage="report"><i>05</i><span>报告生成</span></div>
+        </div>
+      </article>
+
+      <aside class="command-panel">
+        <div class="command-head"><span>INCIDENT CONTROL</span><strong id="status">STANDBY</strong></div>
+        <label for="scenario">注入模拟告警</label>
+        <select id="scenario"><option value="cpu_spike">CPU 飙升 / GC 压力</option><option value="connection_pool">数据库连接池耗尽</option><option value="bad_release">异常版本发布</option></select>
+        <div id="incident-card" class="incident-card"></div>
+        <button id="start" class="launch"><span>启动自主诊断</span><i>→</i></button>
+
+        <div class="radar-block">
+          <div class="radar"><i></i><i></i><i></i><span></span></div>
+          <div><span>AGENT READINESS</span><strong>100%</strong><small>3 Skills · Redis Online</small></div>
+        </div>
+
+        <div class="task-id"><span>TASK IDENTIFIER</span><code id="task-id">NOT ASSIGNED</code></div>
+      </aside>
+    </section>
+
+    <section class="lower-grid">
+      <article class="signal-panel">
+        <div class="panel-head"><div><span>OBSERVABILITY SIGNALS</span><h2>服务信号</h2></div><div class="chart-legend"><i></i>CPU <i></i>Latency</div></div>
+        <svg id="signal-chart" viewBox="0 0 720 170" preserveAspectRatio="none" aria-label="CPU 与延迟趋势">
+          <g class="grid-lines"><line x1="0" y1="30" x2="720" y2="30"/><line x1="0" y1="85" x2="720" y2="85"/><line x1="0" y1="140" x2="720" y2="140"/></g>
+          <path class="area" d="M0 125 C60 120 80 110 130 117 S210 107 260 112 S330 70 380 83 S450 42 510 55 S580 24 630 38 S690 17 720 28 L720 170 L0 170Z"/>
+          <path class="cpu-line" d="M0 125 C60 120 80 110 130 117 S210 107 260 112 S330 70 380 83 S450 42 510 55 S580 24 630 38 S690 17 720 28"/>
+          <path class="latency-line" d="M0 138 C75 132 105 142 165 128 S255 137 315 119 S410 130 465 100 S555 112 610 83 S680 92 720 69"/>
+          <circle class="hotpoint" cx="690" cy="34" r="5"/><text x="682" y="17">92%</text>
+        </svg>
+        <div class="axis"><span>−30m</span><span>−20m</span><span>−10m</span><span>NOW</span></div>
+      </article>
+
+      <article class="result-panel">
+        <div class="panel-head"><div><span>EVIDENCE SYNTHESIS</span><h2>诊断结论</h2></div><div class="confidence"><div class="confidence-ring"><span id="confidence">--</span></div><small>置信度</small></div></div>
+        <div id="conclusion-box" class="conclusion-box"><div class="empty-orb"><i></i></div><p id="conclusion">等待 Agent 汇总证据</p></div>
+        <div class="evidence-dots"><span data-evidence="rag">RAG</span><span data-evidence="metrics">METRICS</span><span data-evidence="logs">LOGS</span></div>
+        <a id="report" class="report-link hidden"><span>下载完整诊断报告</span><b>PDF ↗</b></a>
       </article>
     </section>
 
-    <section class="analysis-grid">
-      <article class="card timeline-card">
-        <div class="card-heading"><div><span class="kicker">REAL-TIME TRACE</span><h3>Agent 执行轨迹</h3></div><span id="event-count" class="event-count">0 EVENTS</span></div>
-        <ol id="timeline" class="timeline"><li class="timeline-empty"><span>⌁</span><strong>等待任务启动</strong><small>Agent 的规划、检索和工具调用将在这里实时呈现</small></li></ol>
-      </article>
-      <article class="card conclusion-card">
-        <div class="card-heading"><div><span class="kicker">EVIDENCE-BOUND RESULT</span><h3>诊断结论</h3></div><span class="confidence">可信度 94%</span></div>
-        <div class="conclusion-state" id="conclusion-wrap"><div class="scan-icon"><span></span></div><p id="conclusion">尚未开始诊断</p><small>结论将严格引用工具返回的观测证据</small></div>
-      </article>
-    </section>
-    <footer><span>SentinelOps AIOps Platform</span><span>Spring AI · Redis · SSE · Dynamic Skills</span></footer>
+    <section class="event-ribbon"><span class="event-title">EVENT STREAM</span><div id="event-cards"><p>等待实时事件流接入…</p></div><b id="event-count">0</b></section>
   </main>
 </div>
 <script src="/app.js"></script>

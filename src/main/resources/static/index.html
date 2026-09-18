@@ -3,50 +3,103 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AIOps Agent Console</title>
+  <title>SentinelOps · AI Diagnosis Center</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-<main>
-  <header>
-    <div>
-      <p class="eyebrow">EVIDENCE-DRIVEN OPERATIONS</p>
-      <h1>AIOps Agent Console</h1>
-      <p>从告警到证据、诊断与报告的可观测闭环</p>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" href="#" aria-label="SentinelOps home">
+      <span class="brand-mark"><i></i><i></i><i></i></span>
+      <span><strong>Sentinel</strong><em>OPS</em></span>
+    </a>
+    <nav>
+      <p>WORKSPACE</p>
+      <a class="active" href="#"><span>⌁</span>智能诊断</a>
+      <a href="#"><span>◇</span>告警中心<small>12</small></a>
+      <a href="#"><span>⌘</span>Agent 任务</a>
+      <p>KNOWLEDGE</p>
+      <a href="#"><span>▱</span>运行手册</a>
+      <a href="#"><span>⬡</span>Skills 管理<small>3</small></a>
+      <a href="#"><span>⌗</span>审计记录</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="system-dot"></div>
+      <div><strong>系统运行正常</strong><span>All systems operational</span></div>
     </div>
-    <span id="health" class="badge">READY</span>
-  </header>
+  </aside>
 
-  <section class="panel controls">
-    <div>
-      <label for="scenario">故障场景</label>
-      <select id="scenario">
-        <option value="cpu_spike">CPU 飙升 / GC 压力</option>
-        <option value="connection_pool">数据库连接池耗尽</option>
-        <option value="bad_release">错误版本发布</option>
-      </select>
-    </div>
-    <button id="start">启动智能诊断</button>
-  </section>
+  <main>
+    <header class="topbar">
+      <div><p class="breadcrumb">工作台 / 智能诊断</p><h1>AI 智能诊断中心</h1></div>
+      <div class="top-actions">
+        <span class="environment"><i></i> PROD · CN-NORTH-1</span>
+        <button class="icon-button" aria-label="通知">◴<b>3</b></button>
+        <div class="avatar">SA</div>
+      </div>
+    </header>
 
-  <section class="grid">
-    <article class="panel">
-      <div class="panel-title"><h2>任务状态</h2><span id="status">IDLE</span></div>
-      <dl id="task-meta"><dt>Task ID</dt><dd>尚未创建</dd></dl>
-      <a id="report" class="report hidden">下载 PDF 报告</a>
-    </article>
-    <article class="panel">
-      <div class="panel-title"><h2>诊断结论</h2></div>
-      <p id="conclusion" class="conclusion">等待诊断任务...</p>
-    </article>
-  </section>
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="ai-label"><i></i> AIOPS DIAGNOSIS AGENT</span>
+        <h2>从告警到根因，<br><em>让每一次排障都有据可循。</em></h2>
+        <p>融合运行手册检索、动态 Skill 调用与证据推理，实时生成可审计的诊断结论。</p>
+      </div>
+      <div class="hero-orbit" aria-hidden="true">
+        <div class="orbit orbit-one"><span></span></div>
+        <div class="orbit orbit-two"><span></span></div>
+        <div class="core"><i></i></div>
+      </div>
+    </section>
 
-  <section class="panel">
-    <div class="panel-title"><h2>Agent 执行时间线</h2><span id="event-count">0 EVENTS</span></div>
-    <ol id="timeline" class="timeline"></ol>
-  </section>
-</main>
+    <section class="metrics">
+      <article><span class="metric-icon purple">⌘</span><div><small>今日诊断任务</small><strong>24</strong><em>↑ 18.2%</em></div></article>
+      <article><span class="metric-icon green">✓</span><div><small>诊断成功率</small><strong>96.8%</strong><em>↑ 2.4%</em></div></article>
+      <article><span class="metric-icon blue">◷</span><div><small>平均诊断耗时</small><strong id="elapsed">42s</strong><em>↓ 31.5%</em></div></article>
+      <article><span class="metric-icon amber">⚡</span><div><small>已加载 Skills</small><strong>3</strong><em class="neutral">全部可用</em></div></article>
+    </section>
+
+    <section class="workspace-grid">
+      <article class="card launch-card">
+        <div class="card-heading"><div><span class="kicker">NEW DIAGNOSIS</span><h3>发起智能诊断</h3></div><span id="health" class="live"><i></i>AGENT READY</span></div>
+        <label for="scenario">选择故障场景</label>
+        <div class="select-wrap">
+          <select id="scenario">
+            <option value="cpu_spike">CPU 飙升 / GC 压力</option>
+            <option value="connection_pool">数据库连接池耗尽</option>
+            <option value="bad_release">版本发布异常</option>
+          </select>
+        </div>
+        <div id="scenario-detail" class="scenario-detail"></div>
+        <button id="start" class="primary-button"><span>✦</span>启动 Agent 诊断<i>→</i></button>
+        <p class="security-note">▣ 诊断工具均为只读操作，全程记录审计日志</p>
+      </article>
+
+      <article class="card task-card">
+        <div class="card-heading"><div><span class="kicker">ACTIVE TASK</span><h3>任务概览</h3></div><span id="status" class="status-pill idle">IDLE</span></div>
+        <dl id="task-meta">
+          <div><dt>任务编号</dt><dd>等待创建</dd></div><div><dt>目标服务</dt><dd>—</dd></div><div><dt>告警等级</dt><dd>—</dd></div>
+        </dl>
+        <div class="pipeline">
+          <div data-step="created"><i>1</i><span>接收告警</span></div><div data-step="planning"><i>2</i><span>任务规划</span></div><div data-step="tools"><i>3</i><span>工具执行</span></div><div data-step="report"><i>4</i><span>生成报告</span></div>
+        </div>
+        <a id="report" class="report-button hidden">↓ 下载诊断报告 <span>PDF</span></a>
+      </article>
+    </section>
+
+    <section class="analysis-grid">
+      <article class="card timeline-card">
+        <div class="card-heading"><div><span class="kicker">REAL-TIME TRACE</span><h3>Agent 执行轨迹</h3></div><span id="event-count" class="event-count">0 EVENTS</span></div>
+        <ol id="timeline" class="timeline"><li class="timeline-empty"><span>⌁</span><strong>等待任务启动</strong><small>Agent 的规划、检索和工具调用将在这里实时呈现</small></li></ol>
+      </article>
+      <article class="card conclusion-card">
+        <div class="card-heading"><div><span class="kicker">EVIDENCE-BOUND RESULT</span><h3>诊断结论</h3></div><span class="confidence">可信度 94%</span></div>
+        <div class="conclusion-state" id="conclusion-wrap"><div class="scan-icon"><span></span></div><p id="conclusion">尚未开始诊断</p><small>结论将严格引用工具返回的观测证据</small></div>
+      </article>
+    </section>
+    <footer><span>SentinelOps AIOps Platform</span><span>Spring AI · Redis · SSE · Dynamic Skills</span></footer>
+  </main>
+</div>
 <script src="/app.js"></script>
 </body>
 </html>
-

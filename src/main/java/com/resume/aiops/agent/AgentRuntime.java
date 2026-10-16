@@ -24,12 +24,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AgentRuntime {
+    private static final Logger log = LoggerFactory.getLogger(AgentRuntime.class);
     private final TaskStateRepository taskRepository;
     private final ToolCallRepository toolCallRepository;
     private final AgentMemoryRepository memoryRepository;
@@ -197,11 +200,14 @@ public class AgentRuntime {
     }
 
     private void failTask(String taskId, Exception exception) {
+        String message = exception.getMessage() == null || exception.getMessage().isBlank()
+                ? exception.getClass().getSimpleName() : exception.getMessage();
+        log.error("Diagnosis task {} failed", taskId, exception);
         taskRepository.findById(taskId).ifPresent(task -> {
-            DiagnosisTask failed = task.fail(exception.getMessage(), Instant.now(clock));
+            DiagnosisTask failed = task.fail(message, Instant.now(clock));
             taskRepository.save(failed);
             eventPublisher.publish(taskId, AgentEventType.TASK_FAILED,
-                    Map.of("status", failed.status(), "message", exception.getMessage() == null ? "Unknown error" : exception.getMessage()));
+                    Map.of("status", failed.status(), "message", message));
         });
         failedCounter.increment();
     }

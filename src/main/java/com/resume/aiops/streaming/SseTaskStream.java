@@ -30,16 +30,17 @@ public class SseTaskStream {
         CopyOnWriteArrayList<SseEmitter> taskEmitters = emitters.computeIfAbsent(taskId,
                 ignored -> new CopyOnWriteArrayList<>());
         taskEmitters.add(emitter);
-        Runnable cleanup = () -> taskEmitters.remove(emitter);
+        Runnable cleanup = () -> deregister(taskId, emitter);
         emitter.onCompletion(cleanup);
         emitter.onTimeout(cleanup);
         emitter.onError(error -> cleanup.run());
-        for (AgentEvent event : journal.findAfter(taskId, lastEventId)) {
+        // Replay from a single snapshot: a second query could observe events the client never received.
+        List<AgentEvent> replayed = journal.findAfter(taskId, lastEventId);
+        for (AgentEvent event : replayed) {
             if (!send(emitter, event)) {
-                break;
+                return emitter;
             }
         }
-        List<AgentEvent> replayed = journal.findAfter(taskId, lastEventId);
         if (!replayed.isEmpty() && isTerminal(replayed.get(replayed.size() - 1))) {
             emitter.complete();
         }
@@ -52,7 +53,16 @@ public class SseTaskStream {
         if (isTerminal(event)) {
             taskEmitters.forEach(SseEmitter::complete);
             taskEmitters.clear();
+            emitters.remove(event.taskId(), taskEmitters);
         }
+    }
+
+    /** Drops the task entry once its last subscriber is gone so the map cannot grow without bound. */
+    void deregister(String taskId, SseEmitter emitter) {
+        emitters.computeIfPresent(taskId, (id, existing) -> {
+            existing.remove(emitter);
+            return existing.isEmpty() ? null : existing;
+        });
     }
 
     private boolean isTerminal(AgentEvent event) {

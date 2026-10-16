@@ -28,6 +28,7 @@ aiops:
   reports-directory: ${AIOPS_REPORTS_DIR:reports}
   task-timeout: 5m
   sse-timeout: 30m
+  agent-decision-timeout: 60s
   max-agent-steps: 8
   sse-heartbeat-ms: 15000
 

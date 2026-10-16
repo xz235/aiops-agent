@@ -52,6 +52,14 @@ runbook. Missing evidence, unsupported scenarios, or a plan truncated by
 event. Transient planner transport failures are retried up to three times;
 malformed model output and other non-transient errors fail the task.
 
+## Streaming lifecycle
+
+A subscriber replays from a single journal snapshot, so the terminal check can only ever
+consider events that were actually sent on that connection. `TASK_COMPLETED`,
+`TASK_REVIEW_REQUIRED` and `TASK_FAILED` close the connection, and the task entry is removed
+once its last subscriber is gone; otherwise the subscriber map would grow one entry per task
+for the lifetime of the process.
+
 ## State and memory
 
 - State is the current mutable task snapshot.
@@ -86,7 +94,10 @@ as AGENT_ACTION memory and emitted as AGENT_DECISION. Tool outputs remain in the
 tool-call repository and are included in subsequent model context. DIAGNOSIS_READY carries
 the whole final answer; this mode does not emit synthetic MODEL_TOKEN events.
 
-Model calls, tool calls and the loop have bounded waiting times. Repetition, exhausted budgets,
+Model calls, tool calls and the loop have bounded waiting times: `aiops.agent-decision-timeout`
+caps one model decision, each Skill declares its own `timeoutMs`, and `aiops.task-timeout` caps
+the whole loop. A saturated worker pool is reported as such instead of being mistaken for a model
+failure, and every fallback reason is logged with the task ID. Repetition, exhausted budgets,
 invalid citations and model failures produce NEEDS_HUMAN_REVIEW with an audit trail and PDF.
 A missing model is rejected before task creation. A task's mode remains in its alert labels.
 This does not implement automatic restart/resume of in-flight decisions or real GPU monitoring.

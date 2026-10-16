@@ -8,6 +8,11 @@ on:
 permissions:
   contents: read
 
+# A new commit on the same branch supersedes an in-flight run.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -22,11 +27,31 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      # The build uses .mvn/settings.xml, which redirects the local repository into
+      # the project directory; setup-java's built-in cache would miss it.
+      - name: Cache Maven repository
+        uses: actions/cache@v4
+        with:
+          path: .m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+
       - name: Run tests
         run: mvn -B -s .mvn/settings.xml test
 
       - name: Package application
         run: mvn -B -s .mvn/settings.xml package -DskipTests
 
+      - name: Replay evaluation set through AgentLoop
+        run: mvn -B -s .mvn/settings.xml test -Dtest=EvaluationTest '-Deval.enabled=true' '-Deval.split=all'
+
       - name: Validate Docker Compose
         run: docker compose config --quiet
+
+      - name: Upload evaluation output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evaluation-output
+          path: target/eval/*.jsonl
+          if-no-files-found: ignore

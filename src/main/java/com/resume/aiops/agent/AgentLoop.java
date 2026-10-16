@@ -11,12 +11,15 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
 import jakarta.annotation.PreDestroy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
 /** Bounded observe/decide/act loop; shares storage and tools with the legacy workflow. */
 @Service
 public class AgentLoop {
+    private static final Logger log = LoggerFactory.getLogger(AgentLoop.class);
     private final ObjectProvider<AgentDecisionClient> clients;
     private final DynamicSkillRegistry registry;
     private final SkillExecutor executor;
@@ -37,7 +40,12 @@ public class AgentLoop {
     public void close() { workers.shutdownNow(); }
 
     private <T> T bounded(Callable<T> operation, long timeoutMs) {
-        Future<T> future = workers.submit(operation);
+        Future<T> future;
+        try {
+            future = workers.submit(operation);
+        } catch (RejectedExecutionException error) {
+            throw new IllegalStateException("Agent worker pool is saturated; no capacity for this call", error);
+        }
         try {
             return future.get(Math.max(1, timeoutMs), TimeUnit.MILLISECONDS);
         } catch (InterruptedException error) {
@@ -46,7 +54,9 @@ public class AgentLoop {
         } catch (TimeoutException error) {
             throw new IllegalStateException("Agent call timed out", error);
         } catch (ExecutionException error) {
-            throw new IllegalStateException(Objects.toString(error.getCause().getMessage(), "Call failed"), error);
+            Throwable cause = error.getCause();
+            throw new IllegalStateException(cause == null ? "Agent call failed"
+                    : Objects.toString(cause.getMessage(), "Agent call failed"), error);
         } finally {
             if (!future.isDone()) future.cancel(true);
         }
@@ -89,9 +99,12 @@ public class AgentLoop {
                 AgentContext context = new AgentContext(task.alert(), catalog, runbooks, observations,
                         properties.maxAgentSteps() - observations.size());
                 action = bounded(() -> client.decide(context),
-                        Math.min(60000, Duration.between(Instant.now(clock), deadline).toMillis()));
+                        Math.min(properties.agentDecisionTimeout().toMillis(),
+                                Duration.between(Instant.now(clock), deadline).toMillis()));
                 if (action == null) throw new IllegalArgumentException("Empty decision");
             } catch (RuntimeException error) {
+                log.warn("Agent decision failed for task {} at turn {}; routing to human review",
+                        task.taskId(), turn, error);
                 return review(task, observations, "Model unavailable or invalid decision; human review required");
             }
             memory.append(new AgentMemoryEntry(UUID.randomUUID().toString(), task.taskId(),
@@ -135,6 +148,7 @@ public class AgentLoop {
                         Math.min(timeout, Duration.between(Instant.now(clock), deadline).toMillis()));
                 success = true;
             } catch (RuntimeException error) {
+                log.warn("Tool {} failed for task {}", action.skillName(), task.taskId(), error);
                 output = Map.of("error", Objects.toString(error.getMessage(), "Tool execution failed"));
                 success = false;
             }

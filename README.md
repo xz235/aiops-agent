@@ -31,7 +31,8 @@ Agent 模式复用现有 Markdown 工具注册、审计、状态存储、SSE 和
 
 默认最多 8 次工具尝试，允许预算耗尽后再请求一次最终结论。相同名称和参数的
 重复调用会停止；未注册或非只读工具被拒绝并作为失败观察返回。每次模型调用
-最多等待 60 秒，工具采用 Skill 中的超时，整个循环受 `aiops.task-timeout` 限制。
+最多等待 `aiops.agent-decision-timeout`（默认 60 秒），工具采用 Skill 中的超时，
+整个循环受 `aiops.task-timeout` 限制。
 超时会尝试取消执行；不响应中断的 Handler 不能被强制终止，因此使用有界线程池。
 最终答案必须引用已有成功调用的 `callId` 和已检索手册的 `documentId`；
 程序只校验证据引用存在，不等价于验证模型结论在语义上正确。
@@ -308,16 +309,22 @@ Content-Type: application/json
 
 ```text
 AgentLoopIntegrationTest: 7
-SpringAiDecisionClientTest: 2
+SseTaskStreamTest: 4
+AiOpsPropertiesTest: 3
 DiagnosisWorkflowIntegrationTest: 3
-DiagnosisReviewIntegrationTest: 1
 DiagnosisSynthesizerTest: 3
+SpringAiDecisionClientTest: 2
+AgentDecisionTimeoutTest: 1
+TaskFailureMessageTest: 1
+DiagnosisReviewIntegrationTest: 1
 MarkdownSkillParserTest: 1
-Total: 17 tests (model doubles and simulated tools)
+Total: 26 executed (model doubles and simulated tools)
+EvaluationTest: 1 opt-in, skipped unless -Deval.enabled=true
 ```
 
 ```powershell
 mvn -s .mvn/settings.xml test
+mvn -s .mvn/settings.xml test -Dtest=EvaluationTest '-Deval.enabled=true' '-Deval.split=all'
 docker compose config --quiet
 ```
 
@@ -326,10 +333,13 @@ docker compose config --quiet
 - Markdown Skill 解析和 Schema 校验；
 - 完整的规划、RAG、三次 Tool 调用和 PDF 生成；
 - Agent Memory、Tool Calling 和事件审计；
+- Agent 循环的观察反馈、失败恢复、预算、证据校验与模型等待超时；
+- SSE 订阅者注销后的资源回收与终态判定；
+- 100 条评测集经真实 `AgentLoop` 回放（离线脚本决策器）；
 - Redis Profile 应用重启后的状态恢复已人工验证。
 
 仓库包含 GitHub Actions 工作流，每次 Push 和 Pull Request 都会在 Java 17 下执行
-测试、打包和 Compose 配置校验。
+测试、打包、评测集回放和 Compose 配置校验，并缓存 Maven 依赖。
 
 ## 设计边界
 

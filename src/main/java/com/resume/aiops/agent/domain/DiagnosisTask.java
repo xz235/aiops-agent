@@ -38,6 +38,11 @@ public record DiagnosisTask(
                 result, generatedReportId, null, createdAt, now);
     }
 
+    public DiagnosisTask requireHumanReview(String result, String generatedReportId, Instant now) {
+        return new DiagnosisTask(taskId, version + 1, TaskStatus.NEEDS_HUMAN_REVIEW, alert, plannedSkills,
+                result, generatedReportId, null, createdAt, now);
+    }
+
     public DiagnosisTask fail(String message, Instant now) {
         return new DiagnosisTask(taskId, version + 1, TaskStatus.FAILED, alert, plannedSkills,
                 conclusion, reportId, message, createdAt, now);

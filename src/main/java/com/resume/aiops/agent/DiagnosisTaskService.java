@@ -18,9 +18,11 @@ public class DiagnosisTaskService {
     private final AgentRuntime runtime;
     private final AgentEventPublisher eventPublisher;
     private final Clock clock;
+    private final AgentLoop agentLoop;
 
     public DiagnosisTaskService(TaskStateRepository repository, AgentRuntime runtime,
-                                AgentEventPublisher eventPublisher, Clock clock) {
+                                AgentEventPublisher eventPublisher, Clock clock, AgentLoop agentLoop) {
+        this.agentLoop = agentLoop;
         this.repository = repository;
         this.runtime = runtime;
         this.eventPublisher = eventPublisher;
@@ -28,6 +30,7 @@ public class DiagnosisTaskService {
     }
 
     public DiagnosisTask create(AlertInput alert) {
+        agentLoop.validateMode(alert);
         DiagnosisTask task = DiagnosisTask.create(UUID.randomUUID().toString(), alert, Instant.now(clock));
         repository.save(task);
         eventPublisher.publish(task.taskId(), AgentEventType.TASK_CREATED,

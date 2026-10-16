@@ -84,14 +84,16 @@
 
       <aside class="command-panel">
         <div class="command-head"><span>INCIDENT CONTROL</span><strong id="status">STANDBY</strong></div>
+        <label for="mode">执行模式（当前数据均为模拟）</label>
+        <select id="mode"><option value="workflow">工作流 · 固定规则</option><option value="agent">Agent · 模型逐轮决策（需配置模型）</option></select>
         <label for="scenario">注入模拟告警</label>
         <select id="scenario"><option value="cpu_spike">CPU 飙升 / GC 压力</option><option value="connection_pool">数据库连接池耗尽</option><option value="bad_release">异常版本发布</option></select>
         <div id="incident-card" class="incident-card"></div>
-        <button id="start" class="launch"><span>启动自主诊断</span><i>→</i></button>
+        <button id="start" class="launch"><span>启动诊断</span><i>→</i></button>
 
         <div class="radar-block">
           <div class="radar"><i></i><i></i><i></i><span></span></div>
-          <div><span>AGENT READINESS</span><strong>100%</strong><small>3 Skills · Redis Online</small></div>
+          <div><span>DATA SOURCE</span><strong>模拟数据</strong><small>3 Skills · 可选模型决策</small></div>
         </div>
 
         <div class="task-id"><span>TASK IDENTIFIER</span><code id="task-id">NOT ASSIGNED</code></div>
@@ -112,7 +114,7 @@
       </article>
 
       <article class="result-panel">
-        <div class="panel-head"><div><span>EVIDENCE SYNTHESIS</span><h2>诊断结论</h2></div><div class="confidence"><div class="confidence-ring"><span id="confidence">--</span></div><small>置信度</small></div></div>
+        <div class="panel-head"><div><span>EVIDENCE SYNTHESIS</span><h2>诊断结论</h2></div><div class="confidence"><div class="confidence-ring"><span id="confidence">--</span></div><small>置信度未评估</small></div></div>
         <div id="conclusion-box" class="conclusion-box"><div class="empty-orb"><i></i></div><p id="conclusion">等待 Agent 汇总证据</p></div>
         <div class="evidence-dots"><span data-evidence="rag">RAG</span><span data-evidence="metrics">METRICS</span><span data-evidence="logs">LOGS</span></div>
         <a id="report" class="report-link hidden"><span>下载完整诊断报告</span><b>PDF ↗</b></a>

@@ -15,7 +15,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
+@org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 class DiagnosisWorkflowIntegrationTest {
+    @Autowired org.springframework.test.web.servlet.MockMvc http;
+
+    @Test
+    void exposesModeSelectorAndReturnsUsefulApiErrorWithoutModel() throws Exception {
+        http.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/index.html"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.content()
+                        .string(org.hamcrest.Matchers.containsString("id=\"mode\"")));
+        http.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/api/diagnoses")
+                .contentType("application/json")
+                .content("{\"title\":\"Failure\",\"service\":\"test\",\"severity\":\"HIGH\",\"labels\":{\"mode\":\"agent\"}}"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.message")
+                        .value(org.hamcrest.Matchers.containsString("model configuration")));
+    }
+    @Test
+    void agentModeWithoutModelIsRejectedBeforeCreatingTask() {
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> taskService.create(new AlertInput(
+                "Failure", "test", "HIGH", "Exit 1", Map.of("mode", "agent"))))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("model configuration");
+    }
     @Autowired
     DiagnosisTaskService taskService;
     @Autowired

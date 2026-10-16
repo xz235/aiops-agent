@@ -48,7 +48,7 @@ public class PdfReportService {
     }
 
     public String generate(DiagnosisTask task, List<ToolCallRecord> calls,
-                           List<RunbookEvidence> evidence, String conclusion) {
+                           List<RunbookEvidence> evidence, String conclusion, boolean reviewRequired) {
         String reportId = "report-" + task.taskId();
         try {
             Files.createDirectories(properties.reportsDirectory());
@@ -63,7 +63,7 @@ public class PdfReportService {
                 document.open();
                 document.add(header(task));
                 document.add(spacer(12));
-                document.add(summary(task, calls, evidence));
+                document.add(summary(task, calls, evidence, reviewRequired));
                 document.add(spacer(14));
                 document.add(sectionTitle("EXECUTIVE DIAGNOSIS"));
                 document.add(conclusionBox(conclusion));
@@ -119,11 +119,11 @@ public class PdfReportService {
     }
 
     private PdfPTable summary(DiagnosisTask task, List<ToolCallRecord> calls,
-                              List<RunbookEvidence> evidence) {
+                              List<RunbookEvidence> evidence, boolean reviewRequired) {
         PdfPTable table = new PdfPTable(4);
         table.setWidthPercentage(100);
         addSummaryCell(table, "SERVICE", task.alert().service());
-        addSummaryCell(table, "STATUS", "REPORT READY");
+        addSummaryCell(table, "STATUS", reviewRequired ? "HUMAN REVIEW" : "REPORT READY");
         addSummaryCell(table, "TOOL CALLS", String.valueOf(calls.size()));
         addSummaryCell(table, "RUNBOOK HITS", String.valueOf(evidence.size()));
         return table;

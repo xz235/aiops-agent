@@ -56,7 +56,9 @@ public class SseTaskStream {
     }
 
     private boolean isTerminal(AgentEvent event) {
-        return event.type() == AgentEventType.TASK_COMPLETED || event.type() == AgentEventType.TASK_FAILED;
+        return event.type() == AgentEventType.TASK_COMPLETED
+                || event.type() == AgentEventType.TASK_REVIEW_REQUIRED
+                || event.type() == AgentEventType.TASK_FAILED;
     }
 
     @Scheduled(fixedDelayString = "${aiops.sse-heartbeat-ms:15000}")

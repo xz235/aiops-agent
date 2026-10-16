@@ -3,7 +3,7 @@
 ![Java](https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.5-6DB33F?logo=springboot)
 ![Spring AI](https://img.shields.io/badge/Spring%20AI-1.0.0-6DB33F)
-![Tests](https://img.shields.io/badge/tests-2%20passed-brightgreen)
+![Tests](https://img.shields.io/badge/tests-Maven-blue)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
 一个证据驱动的智能运维 Agent 平台：接收服务告警，检索排障知识，通过动态
@@ -14,6 +14,59 @@ SSE 实时推送诊断过程，最终生成可审计的 PDF 报告。
 大模型时，可以启用 Spring AI 的 `llm` Profile。
 
 ![AIOps 可视化指挥中心](docs/dashboard-preview.png)
+
+## 两种执行模式
+
+页面新增“执行模式”选择，API 通过 `labels.mode` 保存到任务：
+
+| 模式 | 如何决定下一步 | 是否需要模型 |
+| --- | --- | --- |
+| `workflow`（默认） | 保留规则规划、顺序执行、规则诊断 | 不需要 |
+| `agent` | 模型每轮选择一个工具，读取返回结果后继续决策或输出结论 | 需要 `llm` Profile |
+
+Agent 模式复用现有 Markdown 工具注册、审计、状态存储、SSE 和 PDF。
+工具目录来自动态注册表；每轮输入包括告警、可用只读工具、检索到的手册、
+历次工具结果（包括失败）和剩余调用预算。模型输出结构化 `TOOL` 或 `FINAL`，
+由 Java 校验执行。最终结论来自模型，不使用场景模板合成器。
+
+默认最多 8 次工具尝试，允许预算耗尽后再请求一次最终结论。相同名称和参数的
+重复调用会停止；未注册或非只读工具被拒绝并作为失败观察返回。每次模型调用
+最多等待 60 秒，工具采用 Skill 中的超时，整个循环受 `aiops.task-timeout` 限制。
+超时会尝试取消执行；不响应中断的 Handler 不能被强制终止，因此使用有界线程池。
+最终答案必须引用已有成功调用的 `callId` 和已检索手册的 `documentId`；
+程序只校验证据引用存在，不等价于验证模型结论在语义上正确。
+模型异常、无效引用、重复调用或预算耗尽会转人工复核并生成报告，不静默退回规则诊断。
+
+启用方式（本地内存存储）：
+
+```powershell
+$env:SPRING_PROFILES_ACTIVE='local,llm'
+# 在当前终端设置 OPENAI_API_KEY、OPENAI_BASE_URL 和 OPENAI_MODEL
+java -jar target/aiops-agent-platform-0.1.0-SNAPSHOT.jar
+```
+
+启动后选择“Agent · 模型逐轮决策”。未启用模型时，选择 Agent 会返回明确的 HTTP 400 提示。
+省略 `labels.mode` 的旧请求保持工作流模式。过去的一次性 LLM 规划器保留为兼容选项：
+显式启用 `llm,legacy-planner` 时用于工作流；通常只启用 `llm`，保持工作流规则不变。
+
+```json
+{
+  "title": "Order API error spike",
+  "service": "order-service",
+  "severity": "HIGH",
+  "description": "Error rate increased after deployment",
+  "labels": {"scenario": "bad_release", "mode": "agent"}
+}
+```
+
+Agent 新增 `AGENT_DECISION` 和 `DIAGNOSIS_READY` SSE 事件，前者记录每轮动作，
+后者展示完整模型结论；没有把文本拆词冒充模型 token 流。原工作流的 `MODEL_TOKEN`
+事件为了兼容继续保留，它是模板结论的分段展示，并非真实模型流式生成。
+
+**验证边界：**当前三个观测工具仍返回模拟数据，没有接入 GPU、CUDA OOM 或实验服务器。
+自动测试使用模型替身验证观察反馈、分支选择、失败恢复、预算和证据校验；
+另用 ChatModel 替身验证 Spring AI 请求和 JSON 解析。尚未完成真实模型或实验服务器联调。
+任务记录可持久化，但服务重启后不会自动恢复执行中循环。
 
 ## 项目解决的问题
 
@@ -27,6 +80,10 @@ SSE 实时推送诊断过程，最终生成可审计的 PDF 报告。
 本项目使用“规划 - 检索 - 取证 - 推理 - 报告”闭环解决这些问题。最终结论必须
 引用 RAG 文档和只读 Tool 的真实返回值；任务状态、Memory、Tool Calling 和事件
 流均可持久化、查询与重放。
+
+取证不完整时任务进入 `NEEDS_HUMAN_REVIEW`，报告列出缺失证据，并通过 SSE 发送
+终态事件；工具失败会保留在审计记录中。计划最多执行 `aiops.max-agent-steps` 个
+工具步骤，真实模型规划遇到临时网络或限流错误时最多重试 3 次。
 
 ## 系统架构
 
@@ -67,7 +124,7 @@ HIGH 告警进入
   -> query_recent_releases：发现 2.4.1 为近期变更
   -> Synthesizer 将证据关联到发布异常
   -> Memory 写入 RAG_EVIDENCE 与 DIAGNOSIS
-  -> SSE 流式推送模型 Token 和 Tool 进度
+  -> SSE 推送模板结论片段和 Tool 进度
   -> 生成 PDF 报告并进入 COMPLETED
 ```
 
@@ -180,7 +237,7 @@ GET /api/diagnoses/{taskId}/events
 Last-Event-ID: 12
 ```
 
-同一个连接会推送任务状态、RAG 命中、Tool 开始/完成、模型 Token、报告地址和
+同一个连接会推送任务状态、RAG 命中、Tool 开始/完成、结论内容、报告地址和
 最终结果。事件拥有单任务递增 ID，支持 `Last-Event-ID` 断线重放、心跳和终态清理。
 PDF 二进制通过独立下载接口传输，不塞入 SSE。
 
@@ -245,10 +302,18 @@ Content-Type: application/json
 
 ## 测试结果
 
+新增 [100 条合成诊断评测集与运行说明](eval/README.md)：20 条开发集、80 条测试集，
+支持将案例工具快照注入实际 AgentLoop，分别运行离线管线验证和真实模型评测。
+合成标签仍需人工复核；离线运行成功不代表模型诊断准确率。
+
 ```text
-Tests run: 1, Failures: 0, Errors: 0 - DiagnosisWorkflowIntegrationTest
-Tests run: 1, Failures: 0, Errors: 0 - MarkdownSkillParserTest
-Total: 2 tests, 0 failures, 0 errors
+AgentLoopIntegrationTest: 7
+SpringAiDecisionClientTest: 2
+DiagnosisWorkflowIntegrationTest: 3
+DiagnosisReviewIntegrationTest: 1
+DiagnosisSynthesizerTest: 3
+MarkdownSkillParserTest: 1
+Total: 17 tests (model doubles and simulated tools)
 ```
 
 ```powershell

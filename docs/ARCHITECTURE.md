@@ -36,12 +36,21 @@ com.resume.aiops
 ```text
 CREATED -> PLANNING -> RETRIEVING -> EXECUTING_TOOLS
         -> ANALYZING -> GENERATING_REPORT -> COMPLETED
-                                             `-> FAILED
+                                  |          `-> NEEDS_HUMAN_REVIEW
+                                  `-> FAILED (system or report error)
 ```
 
 All lifecycle transitions are persisted before being published to SSE. This makes
 the event stream replayable and prevents a disconnected browser from becoming the
 source of truth.
+
+Tool failures are recorded in the audit trail and diagnosis continues with the
+available evidence. The offline synthesizer checks the scenario's expected
+metric/log signals, release evidence for bad-release incidents, and its matching
+runbook. Missing evidence, unsupported scenarios, or a plan truncated by
+`max-agent-steps` lead to `NEEDS_HUMAN_REVIEW` with a PDF report and terminal SSE
+event. Transient planner transport failures are retried up to three times;
+malformed model output and other non-transient errors fail the task.
 
 ## State and memory
 
@@ -64,3 +73,21 @@ This guarantees a repeatable end-to-end demonstration without cloud credentials.
 An OpenAI-compatible planner profile can replace the mock while retaining the same
 runtime contracts and validation rules.
 
+
+## Selectable iterative Agent mode
+
+`labels.mode` defaults to `workflow`. The legacy workflow retains its deterministic planner
+and rule synthesizer. With `llm` enabled, `agent` selects `AgentLoop` and
+`SpringAiDecisionClient`: decide one action, validate and execute, append the observation,
+and call the model again. The final response is model-generated and references successful
+call IDs and retrieved document IDs. Reference validation checks existence, not semantic truth.
+The read-only catalog is loaded from DynamicSkillRegistry per task. Each action is stored
+as AGENT_ACTION memory and emitted as AGENT_DECISION. Tool outputs remain in the existing
+tool-call repository and are included in subsequent model context. DIAGNOSIS_READY carries
+the whole final answer; this mode does not emit synthetic MODEL_TOKEN events.
+
+Model calls, tool calls and the loop have bounded waiting times. Repetition, exhausted budgets,
+invalid citations and model failures produce NEEDS_HUMAN_REVIEW with an audit trail and PDF.
+A missing model is rejected before task creation. A task's mode remains in its alert labels.
+This does not implement automatic restart/resume of in-flight decisions or real GPU monitoring.
+The optional legacy-planner profile preserves the old one-shot LLM planner for workflow use.

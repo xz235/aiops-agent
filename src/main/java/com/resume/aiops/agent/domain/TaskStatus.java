@@ -8,7 +8,7 @@ public enum TaskStatus {
     ANALYZING,
     GENERATING_REPORT,
     COMPLETED,
+    NEEDS_HUMAN_REVIEW,
     FAILED,
     CANCELLED
 }
-

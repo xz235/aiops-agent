@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile("!llm")
+@Profile("!legacy-planner")
 public class MockAgentPlanner implements AgentPlanner {
     @Override
     public AgentPlan createPlan(AlertInput alert) {

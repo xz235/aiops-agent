@@ -144,6 +144,14 @@ Skill 使用 Markdown + YAML Front Matter 声明名称、描述、参数 Schema�
 | `query_service_metrics` | `timeRange` | 查询饱和度、错误率和延迟 | [Markdown](skills/query-service-metrics.md) |
 | `query_application_logs` | `query` | 查询错误日志和代表性样本 | [Markdown](skills/query-application-logs.md) |
 | `query_recent_releases` | `timeRange` | 查询近期发布版本并进行时间关联 | [Markdown](skills/query-recent-releases.md) |
+| `query_dependency_health` | `timeRange` | 查上下游依赖健康度、熔断器状态，区分本服务故障与被下游拖累 | [Markdown](skills/query-dependency-health.md) |
+| `query_config_changes` | `timeRange` | 查近期配置变更，区分「代码发布」与「配置改动」两种成因 | [Markdown](skills/query-config-changes.md) |
+| `query_similar_incidents` | `lookback` | 查历史相似告警与处置记录，转人工时给值班人提供先例 | [Markdown](skills/query-similar-incidents.md) |
+| `query_container_events` | `timeRange` | 查容器事件（重启、OOM、驱逐、CPU 限流），排除基础设施成因 | [Markdown](skills/query-container-events.md) |
+
+七个 Skill 全部为 `READ_ONLY`。工作流模式默认只规划前三个；Agent 模式下模型可以
+从完整只读目录中自行挑选，因此新增的四个 Skill 只在 Agent 模式参与决策。所有
+返回仍是模拟数据，没有接入真实监控、Kubernetes 或变更审计系统。
 
 示例定义：
 
@@ -310,6 +318,7 @@ Content-Type: application/json
 ```text
 AgentLoopIntegrationTest: 7
 SseTaskStreamTest: 4
+SkillCatalogTest: 4
 AiOpsPropertiesTest: 3
 DiagnosisWorkflowIntegrationTest: 3
 DiagnosisSynthesizerTest: 3
@@ -318,7 +327,7 @@ AgentDecisionTimeoutTest: 1
 TaskFailureMessageTest: 1
 DiagnosisReviewIntegrationTest: 1
 MarkdownSkillParserTest: 1
-Total: 26 executed (model doubles and simulated tools)
+Total: 30 executed (model doubles and simulated tools)
 EvaluationTest: 1 opt-in, skipped unless -Deval.enabled=true
 ```
 

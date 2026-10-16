@@ -55,6 +55,9 @@ python eval/score.py target/eval/<运行结果文件>.jsonl --reviews eval/revie
 
 ## 范围
 
-入口复用实际 AgentLoop 和 SpringAiDecisionClient（live），仅替换 SkillExecutor 注入固定快照。向模型提供全部三份真实 runbook，因此这里不评测 RAG 检索召回率。工具参数变化仍返回同一窗口快照，不评测参数筛选正确性。工具超时在这里用异常表示，不测真实等待与取消。重复调用、无效引用等保护机制另由现有 AgentLoopIntegrationTest 覆盖。这里不覆盖 HTTP、PDF、SSE、Redis 恢复或真实监控接入。
+入口复用实际 AgentLoop 和 SpringAiDecisionClient（live），仅替换 SkillExecutor 注入固定快照。
+固定快照只覆盖三个观测工具；live 模式向模型展示完整只读目录，模型若选择新增的四个
+只读工具会收到 `Unknown fixture tool` 失败观察并需自行调整，这属于评测装置范围限制，
+不计为工具缺陷。向模型提供全部三份真实 runbook，因此这里不评测 RAG 检索召回率。工具参数变化仍返回同一窗口快照，不评测参数筛选正确性。工具超时在这里用异常表示，不测真实等待与取消。重复调用、无效引用等保护机制另由现有 AgentLoopIntegrationTest 覆盖。这里不覆盖 HTTP、PDF、SSE、Redis 恢复或真实监控接入。
 
 100 条适合作为回归起点；同家族变体相关，20/80 的类别分布并不均衡，应查看分类结果，不能据此推断生产准确率。

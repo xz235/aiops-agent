@@ -150,8 +150,20 @@ Skill 使用 Markdown + YAML Front Matter 声明名称、描述、参数 Schema�
 | `query_container_events` | `timeRange` | 查容器事件（重启、OOM、驱逐、CPU 限流），排除基础设施成因 | [Markdown](skills/query-container-events.md) |
 
 七个 Skill 全部为 `READ_ONLY`。工作流模式默认只规划前三个；Agent 模式下模型可以
-从完整只读目录中自行挑选，因此新增的四个 Skill 只在 Agent 模式参与决策。所有
-返回仍是模拟数据，没有接入真实监控、Kubernetes 或变更审计系统。
+从完整只读目录中自行挑选，因此新增的四个 Skill 只在 Agent 模式参与决策。
+
+**Skill 不是数据源。** Skill 是给模型看的契约（描述、参数 Schema、风险等级、超时）
+加上平台的治理策略（参数校验、调用留痕、只读过滤）；真正取数的是下面的 Source 层：
+
+```text
+模型 → Skill(契约+治理) → SkillHandler(薄适配) → Source(真取数)
+                                                 ├─ SimulatedXxxSource（当前默认，脚本数据）
+                                                 └─ 真实实现（/proc、日志文件、MCP server、监控后端）
+```
+
+`query_service_metrics` 与 `query_application_logs` 已完成这层拆分，handler 只剩三行委派。
+**当前默认实现仍是脚本数据，没有接入真实监控、日志或 Kubernetes。** 接入真实来源只需
+新增一个 Source 实现，Skill 定义、参数 Schema 和调用链都不用改。
 
 示例定义：
 
@@ -322,12 +334,13 @@ SkillCatalogTest: 4
 AiOpsPropertiesTest: 3
 DiagnosisWorkflowIntegrationTest: 3
 DiagnosisSynthesizerTest: 3
+SourceLayeringTest: 3
 SpringAiDecisionClientTest: 2
 AgentDecisionTimeoutTest: 1
 TaskFailureMessageTest: 1
 DiagnosisReviewIntegrationTest: 1
 MarkdownSkillParserTest: 1
-Total: 30 executed (model doubles and simulated tools)
+Total: 33 executed (model doubles and simulated tools)
 EvaluationTest: 1 opt-in, skipped unless -Deval.enabled=true
 ```
 
